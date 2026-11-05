@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#211915"><title>Barion Fácil</title>
+<meta name="theme-color" content="#211915"><title>Controle Operacional</title>
 <style>
 :root{color-scheme:dark;--bg:#100e0d;--panel:#1b1715;--panel2:#241e1a;--line:#3b302a;--txt:#f5eee8;--muted:#b6a79d;--copper:#c17b56;--copper2:#8f5035;--ok:#82b99a;--red:#d8897e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:30px;min-width:980px}
@@ -24,7 +24,7 @@ footer{text-align:center;color:#89796f;font-size:11px;padding:15px}
 
 @media print{body{background:#fff;color:#111;padding:0}header,nav,.no-print{display:none!important}.card{background:#fff;color:#111;border:1px solid #aaa;break-inside:avoid}input,textarea{color:#111;background:#fff;border:0}th,td{border-color:#ccc}}
 </style></head><body>
-<header><div><small>CONTROLE OPERACIONAL</small><h1>BARION FÁCIL</h1></div><div><div id="status">● Salvamento automático</div><small class="muted">Versão para computador • dados salvos neste navegador</small></div></header>
+<header><div><small>CONTROLE OPERACIONAL</small><h1>CONTROLE OPERACIONAL</h1></div><div><div id="status">● Salvamento automático</div><small class="muted">Versão para computador • dados salvos neste navegador</small></div></header>
 <main>
 <nav id="nav"><button class="active" data-tab="nfs">NFs pendentes</button><button data-tab="notes">Anotações</button><button data-tab="notstored">Não guardados</button><button data-tab="calc">Calculadora</button><button data-tab="print">Impressão</button></nav>
 <section id="nfs" class="page">
@@ -37,7 +37,7 @@ footer{text-align:center;color:#89796f;font-size:11px;padding:15px}
 <button class="btn primary" id="addLine">Adicionar</button></div><div id="nfHint" class="suggest">Digite o código ou parte do nome para localizar o produto na base.</div>
 <div class="scroll"><table><thead><tr><th>Código</th><th>Produto</th><th>Un.</th><th>Qtd.</th><th></th></tr></thead><tbody id="nfLines"></tbody></table></div>
 <div class="actions"><button class="btn primary" id="saveNF">Salvar NF pendente</button><button class="btn ghost" id="clearNF">Limpar formulário</button></div></div>
-<div class="card"><h2>NFs cadastradas</h2><div class="actions no-print"><button class="btn primary" id="sendAllWhatsApp">Enviar todas em imagem</button><button class="btn ghost" id="copyAllImages">Copiar todas as imagens</button></div><label>Pesquisar NF, código, produto ou motivo</label><input id="nfSearch" placeholder="Pesquisar..."><div class="scroll"><table><thead><tr><th>NF</th><th>Produtos</th><th>Motivo</th><th></th></tr></thead><tbody id="nfRows"></tbody></table></div></div>
+<div class="card"><h2>NFs cadastradas</h2><div class="actions no-print"><button class="btn primary" id="sendAllWhatsApp">Enviar todas em imagem</button><button class="btn ghost" id="copyAllImages">Copiar todas as imagens</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input id="joinPallets" type="checkbox" style="width:auto;accent-color:#c17b56"> Juntar pallets do mesmo produto no relatório (opcional)</label><label>Pesquisar NF, código, produto ou motivo</label><input id="nfSearch" placeholder="Pesquisar..."><div class="scroll"><table><thead><tr><th>NF</th><th>Produtos</th><th>Motivo</th><th></th></tr></thead><tbody id="nfRows"></tbody></table></div></div>
 </section>
 <section id="notes" class="page hidden">
 <div class="card"><h2>Registrar produto armazenado</h2>
@@ -81,13 +81,14 @@ $('addLine').onclick=()=>{let p=findProduct($('nfProduct').value),q=Number($('nf
 $('clearNF').onclick=()=>{['nfNumber','nfReason','nfProduct','nfDesc','nfUnit','nfQty'].forEach(id=>$(id).value='');pendingLines=[];renderLines();};
 let nfIdSequence=0;
 $('saveNF').onclick=()=>{let number=$('nfNumber').value.trim(),reason=$('nfReason').value.trim();if(!number){alert('Informe o número da NF.');return}if(!pendingLines.length){alert('Adicione pelo menos um produto.');return}const record={id:Date.now()*1000+(nfIdSequence++),number,reason,lines:pendingLines.map(p=>({...p})),date:new Date().toISOString()};db.nfs.unshift(record);if(!save()){db.nfs=db.nfs.filter(n=>n.id!==record.id);return}$('clearNF').click();renderNFs();alert('NF '+number+' salva. Você já pode cadastrar a próxima NF.');};
-function drawNFImage(nfs){
+function drawNFImage(nfs,joinPallets=false){
  const scale=2, width=1080, pad=64, inner=width-pad*2;
  const measure=document.createElement('canvas').getContext('2d');
  const wrap=(text,font,max)=>{measure.font=font;const words=String(text).split(/\s+/);let out=[],line='';for(const word of words){const test=line?line+' '+word:word;if(measure.measureText(test).width>max&&line){out.push(line);line=word}else line=test}if(line)out.push(line);return out};
  const cards=nfs.map(n=>{
   const rows=[];
-  n.lines.forEach(p=>{const name=wrap(`${p.code}  |  ${p.name}`,'600 25px Arial',inner-250);rows.push({name,qty:`${p.qty} ${p.unit}`})});
+  const lines=joinPallets?n.lines.reduce((acc,p)=>{const key=[p.code,p.name,p.unit].join('|');const found=acc.find(x=>x.key===key);if(found)found.qty=Number(found.qty)+Number(p.qty);else acc.push({...p,key});return acc},[]):n.lines;
+  lines.forEach(p=>{const name=wrap(`${p.code}  |  ${p.name}`,'600 25px Arial',inner-250);rows.push({name,qty:`${p.qty} ${p.unit}`})});
   return {n,rows,reason:wrap(n.reason||'Não informado','22px Arial',inner-190)};
  });
  let height=250+cards.reduce((sum,c)=>sum+210+c.reason.length*30+c.rows.reduce((a,r)=>a+Math.max(68,r.name.length*32),0),0)+cards.length*28+70;
@@ -98,7 +99,7 @@ function drawNFImage(nfs){
  rr(34,30,width-68,height-60,28,'#fffdfa');
  rr(34,30,width-68,178,28,'#2b211c');ctx.fillStyle='#c8875b';ctx.fillRect(34,195,width-68,5);
  ctx.fillStyle='#d7a17e';ctx.font='bold 19px Arial';ctx.fillText('CONTROLE OPERACIONAL',pad,78);
- ctx.fillStyle='#fff';ctx.font='bold 38px Arial';ctx.fillText('BARION FÁCIL',pad,128);
+ ctx.fillStyle='#fff';ctx.font='bold 38px Arial';ctx.fillText('RELATÓRIO OPERACIONAL',pad,128);
  ctx.fillStyle='#f0d8c7';ctx.font='bold 25px Arial';ctx.fillText(nfs.length===1?'RELATÓRIO DE NF PENDENTE':'RELATÓRIO DE NFs PENDENTES',pad,170);
  ctx.fillStyle='#66564c';ctx.font='20px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,245);ctx.textAlign='left';
  let y=285;
@@ -121,7 +122,7 @@ function drawNFImage(nfs){
   });
   y+=cardHeight+24;
  });
- ctx.fillStyle='#8b7b70';ctx.font='17px Arial';ctx.textAlign='center';ctx.fillText('BARION  •  CONTROLE DE PENDÊNCIAS',width/2,height-52);ctx.textAlign='left';
+ ctx.fillStyle='#8b7b70';ctx.font='17px Arial';ctx.textAlign='center';ctx.fillText('CONTROLE DE PENDÊNCIAS',width/2,height-52);ctx.textAlign='left';
  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
 }
 function downloadPNG(blob,filename){
@@ -130,7 +131,7 @@ function downloadPNG(blob,filename){
 async function shareNFsAsImage(nfs){
  if(!nfs.length){alert('Não há NFs pendentes cadastradas.');return}
  try{
-  const blob=await drawNFImage(nfs);if(!blob)throw new Error('Não foi possível gerar a imagem.');
+  const blob=await drawNFImage(nfs,$('joinPallets').checked);if(!blob)throw new Error('Não foi possível gerar a imagem.');
   const filename=nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png';
   const file=new File([blob],filename,{type:'image/png'});
   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
@@ -147,7 +148,7 @@ window.sendNFImage=id=>{const n=db.nfs.find(x=>x.id===id);if(n)shareNFsAsImage([
 async function copyNFsImage(nfs){
  if(!nfs.length){alert('Não há NFs pendentes cadastradas.');return}
  if(!window.isSecureContext || !navigator.clipboard || !window.ClipboardItem || !navigator.clipboard.write){
-  const blob=await drawNFImage(nfs);if(!blob){alert('Não foi possível gerar a imagem.');return;}
+  const blob=await drawNFImage(nfs,$('joinPallets').checked);if(!blob){alert('Não foi possível gerar a imagem.');return;}
   downloadPNG(blob,nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png');
   alert('Este modo do navegador não permite copiar PNG diretamente. A imagem foi baixada; abra o arquivo e copie ou anexe no WhatsApp.');
   return;
@@ -155,7 +156,7 @@ async function copyNFsImage(nfs){
  try{
   // Passa a geração da imagem como promessa ao ClipboardItem para preservar
   // a ativação do clique do usuário enquanto o PNG é preparado.
-  const imagePromise=drawNFImage(nfs).then(blob=>{
+  const imagePromise=drawNFImage(nfs,$('joinPallets').checked).then(blob=>{
    if(!blob) throw new Error('Não foi possível gerar a imagem.');
    return blob;
   });
@@ -164,7 +165,7 @@ async function copyNFsImage(nfs){
   alert('Imagem copiada para a área de transferência. Abra o WhatsApp e cole com Ctrl + V.');
  }catch(e){
   console.error('Falha ao copiar imagem:',e);
-  const blob=await drawNFImage(nfs);if(blob){downloadPNG(blob,nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png');alert('A cópia foi bloqueada pelo navegador. A imagem foi baixada como alternativa.');}else{alert('O navegador bloqueou a cópia e não foi possível gerar o PNG.');}
+  const blob=await drawNFImage(nfs,$('joinPallets').checked);if(blob){downloadPNG(blob,nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png');alert('A cópia foi bloqueada pelo navegador. A imagem foi baixada como alternativa.');}else{alert('O navegador bloqueou a cópia e não foi possível gerar o PNG.');}
  }
 }
 window.copyNFImage=id=>{const n=db.nfs.find(x=>x.id===id);if(n)copyNFsImage([n]);};
