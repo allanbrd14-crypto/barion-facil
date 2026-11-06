@@ -71,7 +71,7 @@ $('saveNF').onclick=()=>{let number=$('nfNumber').value.trim(),reason=$('nfReaso
 function drawNFImage(nfs,joinPallets=false){
  const scale=2, width=1080, pad=64, inner=width-pad*2;
  const measure=document.createElement('canvas').getContext('2d');
- const wrap=(text,font,max)=>{measure.font=font;const words=String(text).split(/\\s+/);let out=[],line='';for(const word of words){const test=line?line+' '+word:word;if(measure.measureText(test).width>max&&line){out.push(line);line=word}else line=test}if(line)out.push(line);return out};
+ const wrap=(text,font,max)=>{measure.font=font;const words=String(text).split(/\s+/);let out=[],line='';for(const word of words){const test=line?line+' '+word:word;if(measure.measureText(test).width>max&&line){out.push(line);line=word}else line=test}if(line)out.push(line);return out};
  let cards;
  if(joinPallets){
   const grouped=new Map();
@@ -81,15 +81,15 @@ function drawNFImage(nfs,joinPallets=false){
    const item=grouped.get(key);item.qty+=Number(p.qty)||0;
    if(!item.sourceNFs.includes(String(n.number)))item.sourceNFs.push(String(n.number));
   }));
-  const rows=[...grouped.values()].map(p=>({name:wrap(`${p.code}  |  ${p.name}`,'600 25px Arial',inner-250),qty:`${p.qty} ${p.unit}`,source:p.sourceNFs.join(', ')}));
+  const rows=[...grouped.values()].map(p=>({name:wrap(`${p.code}  |  ${p.name}`,'600 18px Arial',inner-270),qty:`${p.qty} ${p.unit}`,source:p.sourceNFs.join(', ')}));
   cards=[{title:'PALLETS NÃO ARMAZENADOS',reason:wrap('Contagem consolidada das NFs pendentes: '+nfs.map(n=>n.number).join(', '),'22px Arial',inner-190),rows}];
  }else{
   cards=nfs.map(n=>{
-   const rows=n.lines.map(p=>({name:wrap(`${p.code}  |  ${p.name}${p.lot?'  |  LOTE: '+p.lot:''}${p.expiry?'  |  VALIDADE: '+new Date(p.expiry+'T00:00:00').toLocaleDateString('pt-BR'):''}`,'600 25px Arial',inner-250),qty:`${p.qty} ${p.unit}`}));
+   const rows=n.lines.map(p=>({name:wrap(`${p.code}  |  ${p.name}${p.lot?'  |  LOTE: '+p.lot:''}${p.expiry?'  |  VALIDADE: '+new Date(p.expiry+'T00:00:00').toLocaleDateString('pt-BR'):''}`,'600 18px Arial',inner-270),qty:`${p.qty} ${p.unit}`}));
    return {title:'NF '+n.number,reason:wrap(n.reason||'Não informado','22px Arial',inner-190),rows};
   });
  }
- let height=250+cards.reduce((sum,c)=>sum+210+c.reason.length*30+c.rows.reduce((a,r)=>a+Math.max(68,r.name.length*32)+ (r.source?24:0),0),0)+cards.length*28+70;
+ let height=250+cards.reduce((sum,c)=>sum+210+c.reason.length*30+c.rows.reduce((a,r)=>a+Math.max(68,r.name.length*23)+ (r.source?24:0),0),0)+cards.length*28+70;
  const canvas=document.createElement('canvas');canvas.width=width*scale;canvas.height=height*scale;
  const ctx=canvas.getContext('2d');ctx.scale(scale,scale);
  const rr=(x,y,w,h,r,fill)=>{ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};
@@ -102,7 +102,7 @@ function drawNFImage(nfs,joinPallets=false){
  ctx.fillStyle='#66564c';ctx.font='20px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,245);ctx.textAlign='left';
  let y=285;
  cards.forEach((card,idx)=>{
-  const cardHeight=175+card.reason.length*30+card.rows.reduce((a,r)=>a+Math.max(68,r.name.length*32)+(r.source?24:0)+8,0);
+  const cardHeight=175+card.reason.length*30+card.rows.reduce((a,r)=>a+Math.max(68,r.name.length*23)+(r.source?24:0)+8,0);
   rr(pad,y,inner,cardHeight,18,'#f7f3ef');rr(pad,y,9,cardHeight,5,'#b97852');
   ctx.fillStyle='#865238';ctx.font='bold 31px Arial';ctx.fillText(card.title,pad+30,y+48);
   ctx.fillStyle='#76665c';ctx.font='bold 17px Arial';ctx.fillText(joinPallets?'REFERÊNCIA':'MOTIVO DA PENDÊNCIA',pad+30,y+86);
@@ -110,12 +110,12 @@ function drawNFImage(nfs,joinPallets=false){
   let ry=y+135+card.reason.length*30;
   ctx.fillStyle='#865238';ctx.font='bold 18px Arial';ctx.fillText('PRODUTOS',pad+30,ry);ry+=18;
   card.rows.forEach((r,i)=>{
-   const rh=Math.max(68,r.name.length*32)+(r.source?24:0);
+   const rh=Math.max(68,r.name.length*23)+(r.source?24:0);
    rr(pad+22,ry,inner-44,rh,10,i%2?'#eee7e1':'#fffdfa');
-   ctx.fillStyle='#302923';ctx.font='600 25px Arial';r.name.forEach((line,j)=>ctx.fillText(line,pad+42,ry+34+j*31));
+   ctx.fillStyle='#302923';ctx.font='600 18px Arial';r.name.forEach((line,j)=>ctx.fillText(line,pad+42,ry+25+j*23));
    if(r.source){ctx.fillStyle='#8b7b70';ctx.font='15px Arial';ctx.fillText('NFs: '+r.source,pad+42,ry+rh-7);}
-   rr(width-pad-220,ry+13,155,42,20,'#ead7c9');
-   ctx.fillStyle='#75472f';ctx.font='bold 21px Arial';ctx.textAlign='center';ctx.fillText(r.qty,width-pad-142,ry+41);ctx.textAlign='left';
+   rr(width-pad-190,ry+9,140,36,20,'#ead7c9');
+   ctx.fillStyle='#75472f';ctx.font='bold 17px Arial';ctx.textAlign='center';ctx.fillText(r.qty,width-pad-120,ry+41);ctx.textAlign='left';
    ry+=rh+8;
   });
   y+=cardHeight+24;
