@@ -120,14 +120,14 @@ function drawNFImage(nfs,joinPallets=false){
  rr(24,20,width-48,height-40,18,'#211a16');
  ctx.fillStyle='#a96f4c';ctx.fillRect(24,20,8,height-40);
  ctx.fillStyle='#a96f4c';ctx.font='bold 15px Arial';ctx.fillText('BARION  /  CONTROLE OPERACIONAL',pad,58);
- ctx.fillStyle='#30231c';ctx.font='bold 32px Arial';ctx.fillText('Relatório operacional',pad,103);
+ ctx.fillStyle='#fff7f0';ctx.font='bold 32px Arial';ctx.fillText('RELATÓRIO OPERACIONAL',pad,103);
  ctx.fillStyle='#d0b6a3';ctx.font='bold 19px Arial';ctx.fillText(joinPallets?'Pallets não armazenados':'Notas fiscais pendentes',pad,136);
  ctx.fillStyle='#59483c';ctx.fillRect(pad,154,inner,1);
  ctx.fillStyle='#bda18d';ctx.font='14px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,177);ctx.textAlign='left';
  let y=202;
  cards.forEach((card,idx)=>{
   const ch=cardHeight(card);
-  ctx.fillStyle='#30231c';ctx.font='bold 22px Arial';ctx.fillText(card.title,pad+4,y+27);
+  ctx.fillStyle='#fff7f0';ctx.font='bold 24px Arial';ctx.fillText(card.title,pad+4,y+27);
   ctx.fillStyle='#a36c4b';ctx.fillRect(pad,y+39,inner,2);
   ctx.fillStyle='#c2a994';ctx.font='bold 11px Arial';ctx.fillText(joinPallets?'REFERÊNCIA':'MOTIVO DA PENDÊNCIA',pad+4,y+61);
   ctx.fillStyle='#f0e5dc';ctx.font='15px Arial';card.reasonLines.forEach((line,i)=>ctx.fillText(line,pad+190,y+61+i*19));
