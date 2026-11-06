@@ -116,38 +116,38 @@ function drawNFImageV2(nfs,joinPallets=false){
  const canvas=document.createElement('canvas');canvas.width=width*scale;canvas.height=height*scale;
  const ctx=canvas.getContext('2d');ctx.scale(scale,scale);
  const rr=(x,y,w,h,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};
- ctx.fillStyle='#38271f';ctx.fillRect(0,0,width,height);
- rr(24,20,width-48,height-40,18,'#493328');
- ctx.fillStyle='#c18458';ctx.fillRect(24,20,8,height-40);
- ctx.fillStyle='#c18458';ctx.font='bold 15px Arial';ctx.fillText('BARION  /  CONTROLE OPERACIONAL',pad,58);
- ctx.fillStyle='#fff7f0';ctx.font='bold 34px Arial';ctx.fillText('RELATÓRIO OPERACIONAL',pad,103);
- ctx.fillStyle='#f4dfcf';ctx.font='bold 19px Arial';ctx.fillText(joinPallets?'Pallets não armazenados':'Notas fiscais pendentes',pad,136);
- ctx.fillStyle='#8b6850';ctx.fillRect(pad,154,inner,1);
- ctx.fillStyle='#e8cdb8';ctx.font='14px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,177);ctx.textAlign='left';
+ ctx.fillStyle='#e9dfd5';ctx.fillRect(0,0,width,height);
+ rr(24,20,width-48,height-40,18,'#fbf8f4');
+ ctx.fillStyle='#9a6748';ctx.fillRect(24,20,7,height-40);
+ ctx.fillStyle='#815437';ctx.font='bold 15px Arial';ctx.fillText('BARION  /  CONTROLE OPERACIONAL',pad,58);
+ ctx.fillStyle='#35271f';ctx.font='bold 34px Arial';ctx.fillText('RELATÓRIO OPERACIONAL',pad,103);
+ ctx.fillStyle='#815437';ctx.font='bold 19px Arial';ctx.fillText(joinPallets?'Pallets não armazenados':'Notas fiscais pendentes',pad,136);
+ ctx.fillStyle='#c7b6a7';ctx.fillRect(pad,154,inner,1);
+ ctx.fillStyle='#65564c';ctx.font='14px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,177);ctx.textAlign='left';
  let y=202;
  cards.forEach((card,idx)=>{
   const ch=cardHeight(card);
-  ctx.fillStyle='#fff7f0';ctx.font='bold 30px Arial';ctx.fillText(card.title,pad+4,y+27);
-  ctx.fillStyle='#c18458';ctx.fillRect(pad,y+39,inner,2);
-  ctx.fillStyle='#f0d9c7';ctx.font='bold 11px Arial';ctx.fillText(joinPallets?'REFERÊNCIA':'MOTIVO DA PENDÊNCIA',pad+4,y+61);
-  ctx.fillStyle='#fff7f0';ctx.font='15px Arial';card.reasonLines.forEach((line,i)=>ctx.fillText(line,pad+190,y+61+i*19));
+  rr(pad,y,inner,ch,10,'#f2ece6');
+  rr(pad,y,inner,44,10,'#765039');ctx.fillStyle='#fffaf5';ctx.font='bold 25px Arial';ctx.fillText(card.title,pad+14,y+30);
+  ctx.fillStyle='#79583f';ctx.font='bold 11px Arial';ctx.fillText(joinPallets?'REFERÊNCIA':'MOTIVO DA PENDÊNCIA',pad+4,y+61);
+  ctx.fillStyle='#342a24';ctx.font='bold 15px Arial';card.reasonLines.forEach((line,i)=>ctx.fillText(line,pad+190,y+61+i*19));
   let ry=y+78+card.reasonLines.length*19;
-  ctx.fillStyle='#76543d';ctx.fillRect(pad,ry,inner,27);
-  ctx.fillStyle='#fff0e5';ctx.font='bold 11px Arial';ctx.fillText('CÓDIGO E DESCRIÇÃO DO PRODUTO',pad+12,ry+18);
+  ctx.fillStyle='#d9c9bb';ctx.fillRect(pad,ry,inner,27);
+  ctx.fillStyle='#49382d';ctx.font='bold 11px Arial';ctx.fillText('CÓDIGO E DESCRIÇÃO DO PRODUTO',pad+12,ry+18);
   ctx.textAlign='right';ctx.fillText('QUANTIDADE',width-pad-12,ry+18);ctx.textAlign='left';
   ry+=27;
   card.rows.forEach((r,i)=>{
    const rh=rowHeight(r);
-   ctx.fillStyle=i%2?'#5a4030':'#493328';ctx.fillRect(pad,ry,inner,rh);
-   ctx.fillStyle='#fff7f0';ctx.font='600 17px Arial';r.lines.forEach((line,j)=>ctx.fillText(line,pad+12,ry+22+j*21));
-   if(r.source){ctx.fillStyle='#f0d9c7';ctx.font='11px Arial';ctx.fillText('NFs: '+r.source,pad+12,ry+rh-4);}
-   ctx.fillStyle='#ffd0a8';ctx.font='bold 15px Arial';ctx.textAlign='right';ctx.fillText(r.qty,width-pad-12,ry+Math.max(29,(rh+16)/2));ctx.textAlign='left';
-   ctx.fillStyle='#76543d';ctx.fillRect(pad,ry+rh-1,inner,1);
+   ctx.fillStyle=i%2?'#eee5dc':'#fffaf6';ctx.fillRect(pad,ry,inner,rh);
+   ctx.fillStyle='#302720';ctx.font='600 17px Arial';r.lines.forEach((line,j)=>ctx.fillText(line,pad+12,ry+22+j*21));
+   if(r.source){ctx.fillStyle='#69594e';ctx.font='11px Arial';ctx.fillText('NFs: '+r.source,pad+12,ry+rh-4);}
+   rr(width-pad-142,ry+Math.max(8,(rh-32)/2),132,32,8,'#9a5d36');ctx.fillStyle='#ffffff';ctx.font='bold 15px Arial';ctx.textAlign='right';ctx.fillText(r.qty,width-pad-12,ry+Math.max(29,(rh+16)/2));ctx.textAlign='left';
+   ctx.fillStyle='#d8c9bc';ctx.fillRect(pad,ry+rh-1,inner,1);
    ry+=rh;
   });
   y+=ch+gap;
  });
- ctx.fillStyle='#e8cdb8';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText('CONTROLE DE PENDÊNCIAS  •  BARION',width/2,height-43);ctx.textAlign='left';
+ ctx.fillStyle='#76665a';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText('CONTROLE DE PENDÊNCIAS  •  BARION',width/2,height-43);ctx.textAlign='left';
  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
 }
 function downloadPNG(blob,filename){
