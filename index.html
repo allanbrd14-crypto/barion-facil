@@ -84,7 +84,7 @@ function drawNFImage(nfs,joinPallets=false){
  const scale=2,width=1080,pad=52,inner=width-pad*2;
  const measure=document.createElement('canvas').getContext('2d');
  const wrap=(text,font,max)=>{
-  measure.font=font;const words=String(text??'').split(/\\s+/);const out=[];let line='';
+  measure.font=font;const words=String(text??'').split(/\s+/);const out=[];let line='';
   for(let word of words){
    while(measure.measureText(word).width>max&&word.length>2){
     let cut=word.length-1;while(cut>1&&measure.measureText(word.slice(0,cut)).width>max)cut--;
