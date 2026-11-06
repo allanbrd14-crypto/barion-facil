@@ -80,7 +80,7 @@ function isNFRawMaterial(p){return !!p&&String(p.code).startsWith('3')}function 
 $('clearNF').onclick=()=>{['nfNumber','nfReason','nfProduct','nfDesc','nfUnit','nfQty','nfLot','nfExpiry'].forEach(id=>$(id).value='');$('nfRawFields').classList.add('hidden');pendingLines=[];renderLines();};
 let nfIdSequence=0;
 $('saveNF').onclick=()=>{let number=$('nfNumber').value.trim(),reason=$('nfReason').value.trim();if(!number){alert('Informe o número da NF.');return}if(!pendingLines.length){alert('Adicione pelo menos um produto.');return}const record={id:Date.now()*1000+(nfIdSequence++),number,reason,lines:pendingLines.map(p=>({...p})),date:new Date().toISOString()};db.nfs.unshift(record);if(!save()){db.nfs=db.nfs.filter(n=>n.id!==record.id);return}$('clearNF').click();renderNFs();alert('NF '+number+' salva. Você já pode cadastrar a próxima NF.');};
-function drawNFImage(nfs,joinPallets=false){
+function drawNFImageV2(nfs,joinPallets=false){
  const scale=2,width=1080,pad=58,inner=width-pad*2,qtyW=150;
  const measure=document.createElement('canvas').getContext('2d');
  const wrap=(value,font,max)=>{
@@ -116,38 +116,38 @@ function drawNFImage(nfs,joinPallets=false){
  const canvas=document.createElement('canvas');canvas.width=width*scale;canvas.height=height*scale;
  const ctx=canvas.getContext('2d');ctx.scale(scale,scale);
  const rr=(x,y,w,h,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};
- ctx.fillStyle='#171310';ctx.fillRect(0,0,width,height);
- rr(24,20,width-48,height-40,18,'#211a16');
- ctx.fillStyle='#a96f4c';ctx.fillRect(24,20,8,height-40);
- ctx.fillStyle='#a96f4c';ctx.font='bold 15px Arial';ctx.fillText('BARION  /  CONTROLE OPERACIONAL',pad,58);
- ctx.fillStyle='#fff7f0';ctx.font='bold 32px Arial';ctx.fillText('RELATÓRIO OPERACIONAL',pad,103);
- ctx.fillStyle='#d0b6a3';ctx.font='bold 19px Arial';ctx.fillText(joinPallets?'Pallets não armazenados':'Notas fiscais pendentes',pad,136);
- ctx.fillStyle='#59483c';ctx.fillRect(pad,154,inner,1);
- ctx.fillStyle='#bda18d';ctx.font='14px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,177);ctx.textAlign='left';
+ ctx.fillStyle='#38271f';ctx.fillRect(0,0,width,height);
+ rr(24,20,width-48,height-40,18,'#493328');
+ ctx.fillStyle='#c18458';ctx.fillRect(24,20,8,height-40);
+ ctx.fillStyle='#c18458';ctx.font='bold 15px Arial';ctx.fillText('BARION  /  CONTROLE OPERACIONAL',pad,58);
+ ctx.fillStyle='#fff7f0';ctx.font='bold 34px Arial';ctx.fillText('RELATÓRIO OPERACIONAL',pad,103);
+ ctx.fillStyle='#f4dfcf';ctx.font='bold 19px Arial';ctx.fillText(joinPallets?'Pallets não armazenados':'Notas fiscais pendentes',pad,136);
+ ctx.fillStyle='#8b6850';ctx.fillRect(pad,154,inner,1);
+ ctx.fillStyle='#e8cdb8';ctx.font='14px Arial';ctx.textAlign='right';ctx.fillText('Emitido em '+new Date().toLocaleString('pt-BR'),width-pad,177);ctx.textAlign='left';
  let y=202;
  cards.forEach((card,idx)=>{
   const ch=cardHeight(card);
-  ctx.fillStyle='#fff7f0';ctx.font='bold 24px Arial';ctx.fillText(card.title,pad+4,y+27);
-  ctx.fillStyle='#a36c4b';ctx.fillRect(pad,y+39,inner,2);
-  ctx.fillStyle='#c2a994';ctx.font='bold 11px Arial';ctx.fillText(joinPallets?'REFERÊNCIA':'MOTIVO DA PENDÊNCIA',pad+4,y+61);
-  ctx.fillStyle='#f0e5dc';ctx.font='15px Arial';card.reasonLines.forEach((line,i)=>ctx.fillText(line,pad+190,y+61+i*19));
+  ctx.fillStyle='#fff7f0';ctx.font='bold 30px Arial';ctx.fillText(card.title,pad+4,y+27);
+  ctx.fillStyle='#c18458';ctx.fillRect(pad,y+39,inner,2);
+  ctx.fillStyle='#f0d9c7';ctx.font='bold 11px Arial';ctx.fillText(joinPallets?'REFERÊNCIA':'MOTIVO DA PENDÊNCIA',pad+4,y+61);
+  ctx.fillStyle='#fff7f0';ctx.font='15px Arial';card.reasonLines.forEach((line,i)=>ctx.fillText(line,pad+190,y+61+i*19));
   let ry=y+78+card.reasonLines.length*19;
-  ctx.fillStyle='#49372b';ctx.fillRect(pad,ry,inner,27);
-  ctx.fillStyle='#d2b9a5';ctx.font='bold 11px Arial';ctx.fillText('CÓDIGO E DESCRIÇÃO DO PRODUTO',pad+12,ry+18);
+  ctx.fillStyle='#76543d';ctx.fillRect(pad,ry,inner,27);
+  ctx.fillStyle='#fff0e5';ctx.font='bold 11px Arial';ctx.fillText('CÓDIGO E DESCRIÇÃO DO PRODUTO',pad+12,ry+18);
   ctx.textAlign='right';ctx.fillText('QUANTIDADE',width-pad-12,ry+18);ctx.textAlign='left';
   ry+=27;
   card.rows.forEach((r,i)=>{
    const rh=rowHeight(r);
-   ctx.fillStyle=i%2?'#30251f':'#211a16';ctx.fillRect(pad,ry,inner,rh);
-   ctx.fillStyle='#f2e8df';ctx.font='600 17px Arial';r.lines.forEach((line,j)=>ctx.fillText(line,pad+12,ry+22+j*21));
-   if(r.source){ctx.fillStyle='#c5aa96';ctx.font='11px Arial';ctx.fillText('NFs: '+r.source,pad+12,ry+rh-4);}
-   ctx.fillStyle='#d5a17d';ctx.font='bold 15px Arial';ctx.textAlign='right';ctx.fillText(r.qty,width-pad-12,ry+Math.max(29,(rh+16)/2));ctx.textAlign='left';
-   ctx.fillStyle='#49372b';ctx.fillRect(pad,ry+rh-1,inner,1);
+   ctx.fillStyle=i%2?'#5a4030':'#493328';ctx.fillRect(pad,ry,inner,rh);
+   ctx.fillStyle='#fff7f0';ctx.font='600 17px Arial';r.lines.forEach((line,j)=>ctx.fillText(line,pad+12,ry+22+j*21));
+   if(r.source){ctx.fillStyle='#f0d9c7';ctx.font='11px Arial';ctx.fillText('NFs: '+r.source,pad+12,ry+rh-4);}
+   ctx.fillStyle='#ffd0a8';ctx.font='bold 15px Arial';ctx.textAlign='right';ctx.fillText(r.qty,width-pad-12,ry+Math.max(29,(rh+16)/2));ctx.textAlign='left';
+   ctx.fillStyle='#76543d';ctx.fillRect(pad,ry+rh-1,inner,1);
    ry+=rh;
   });
   y+=ch+gap;
  });
- ctx.fillStyle='#b99e89';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText('CONTROLE DE PENDÊNCIAS  •  BARION',width/2,height-43);ctx.textAlign='left';
+ ctx.fillStyle='#e8cdb8';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText('CONTROLE DE PENDÊNCIAS  •  BARION',width/2,height-43);ctx.textAlign='left';
  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
 }
 function downloadPNG(blob,filename){
@@ -156,7 +156,7 @@ function downloadPNG(blob,filename){
 async function shareNFsAsImage(nfs){
  if(!nfs.length){alert('Não há NFs pendentes cadastradas.');return}
  try{
-  const blob=await drawNFImage(nfs,false);if(!blob)throw new Error('Não foi possível gerar a imagem.');
+  const blob=await drawNFImageV2(nfs,false);if(!blob)throw new Error('Não foi possível gerar a imagem.');
   const filename=nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png';
   const file=new File([blob],filename,{type:'image/png'});
   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
@@ -173,7 +173,7 @@ window.sendNFImage=id=>{const n=db.nfs.find(x=>x.id===id);if(n)shareNFsAsImage([
 async function copyNFsImage(nfs){
  if(!nfs.length){alert('Não há NFs pendentes cadastradas.');return}
  if(!window.isSecureContext || !navigator.clipboard || !window.ClipboardItem || !navigator.clipboard.write){
-  const blob=await drawNFImage(nfs,false);if(!blob){alert('Não foi possível gerar a imagem.');return;}
+  const blob=await drawNFImageV2(nfs,false);if(!blob){alert('Não foi possível gerar a imagem.');return;}
   downloadPNG(blob,nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png');
   alert('Este modo do navegador não permite copiar PNG diretamente. A imagem foi baixada; abra o arquivo e copie ou anexe no WhatsApp.');
   return;
@@ -181,7 +181,7 @@ async function copyNFsImage(nfs){
  try{
   // Passa a geração da imagem como promessa ao ClipboardItem para preservar
   // a ativação do clique do usuário enquanto o PNG é preparado.
-  const imagePromise=drawNFImage(nfs,$('joinPallets').checked).then(blob=>{
+  const imagePromise=drawNFImageV2(nfs,$('joinPallets').checked).then(blob=>{
    if(!blob) throw new Error('Não foi possível gerar a imagem.');
    return blob;
   });
@@ -190,7 +190,7 @@ async function copyNFsImage(nfs){
   alert('Imagem copiada para a área de transferência. Abra o WhatsApp e cole com Ctrl + V.');
  }catch(e){
   console.error('Falha ao copiar imagem:',e);
-  const blob=await drawNFImage(nfs,$('joinPallets').checked);if(blob){downloadPNG(blob,nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png');alert('A cópia foi bloqueada pelo navegador. A imagem foi baixada como alternativa.');}else{alert('O navegador bloqueou a cópia e não foi possível gerar o PNG.');}
+  const blob=await drawNFImageV2(nfs,$('joinPallets').checked);if(blob){downloadPNG(blob,nfs.length===1?`NF_${nfs[0].number}.png`:'NFs_pendentes_Barion.png');alert('A cópia foi bloqueada pelo navegador. A imagem foi baixada como alternativa.');}else{alert('O navegador bloqueou a cópia e não foi possível gerar o PNG.');}
  }
 }
 window.copyNFImage=id=>{const n=db.nfs.find(x=>x.id===id);if(n)copyNFsImage([n]);};
